@@ -131,6 +131,20 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>S_ENHIMP</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_ENHNAM</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>S_PGMNA</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
@@ -262,6 +276,27 @@
       <item>
        <ID>S</ID>
        <KEY>S_BADINA</KEY>
+       <ENTRY>.</ENTRY>
+       <LENGTH>9</LENGTH>
+       <SPLIT>D</SPLIT>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>S_DEVCLA</KEY>
+       <ENTRY>.</ENTRY>
+       <LENGTH>9</LENGTH>
+       <SPLIT>D</SPLIT>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>S_ENHIMP</KEY>
+       <ENTRY>.</ENTRY>
+       <LENGTH>9</LENGTH>
+       <SPLIT>D</SPLIT>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>S_ENHNAM</KEY>
        <ENTRY>.</ENTRY>
        <LENGTH>9</LENGTH>
        <SPLIT>D</SPLIT>
