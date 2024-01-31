@@ -109,8 +109,8 @@ CLASS lcl_report IMPLEMENTATION.
           sxs_attrt~text AS badi_description, sxs_attr~internal AS is_badi_sap_internal,
           sxc_exit~imp_name AS badi_implementation, sxc_attr~active AS is_badi_active,
           "Enhancement spot
-          sotr_text~text as enhancement_spot_description, enhspotheader~internal as is_enhancement_spot_sap_int,
-          enhobj~enhname as enhancement_spot_impl, enhheader~version as is_enhancement_spot_active
+          sotr_text~text AS enhancement_spot_description, enhspotheader~internal AS is_enhancement_spot_sap_int,
+          enhobj~enhname AS enhancement_spot_impl, enhheader~version AS is_enhancement_spot_active
       WHERE tadir~pgmid     = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
         AND tadir~object   IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
         AND tadir~obj_name IN @s_uename AND tadir~obj_name IN @s_badina
@@ -132,6 +132,10 @@ CLASS lcl_report IMPLEMENTATION.
       output_line-is_badi_sap_internal         = enhancement-is_badi_sap_internal.
       output_line-enhancement_type_description = TEXT-e02.
     ELSEIF enhancement-enhancement_type = c_ext_type-enhancement_spot.
+      output_line-description                  = enhancement-enhancement_spot_description.
+      output_line-implementation               = enhancement-enhancement_spot_impl.
+      output_line-is_active                    = COND #( WHEN enhancement-is_enhancement_spot_active = abap_false THEN abap_false ELSE abap_true ).
+      output_line-is_badi_sap_internal         = enhancement-is_enhancement_spot_sap_int.
       output_line-enhancement_type_description = TEXT-e03.
     ELSEIF enhancement-enhancement_type = c_ext_type-composite_enhancement.
       output_line-enhancement_type_description = TEXT-e04.
