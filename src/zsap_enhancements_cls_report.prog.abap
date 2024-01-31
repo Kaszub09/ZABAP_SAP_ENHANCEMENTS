@@ -91,21 +91,21 @@ CLASS lcl_report IMPLEMENTATION.
 
     SELECT FROM tadir
         "User-Exit
-        LEFT JOIN modsapt ON modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
-        LEFT JOIN modact ON modact~member = tadir~obj_name
+        LEFT JOIN modsapt ON tadir~object = @c_ext_type-user_exit AND modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
+        LEFT JOIN modact ON tadir~object = @c_ext_type-user_exit AND modact~member = tadir~obj_name
         LEFT JOIN modattr ON modattr~name = modsapt~name
         "BADI
-        LEFT JOIN sxs_attr ON sxs_attr~exit_name = tadir~obj_name
+        LEFT JOIN sxs_attr ON tadir~object = @c_ext_type-badi AND sxs_attr~exit_name = tadir~obj_name
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
         LEFT JOIN sxc_exit ON sxc_exit~exit_name = sxs_attrt~exit_name
         LEFT JOIN sxc_attr ON sxc_attr~imp_name = sxc_exit~imp_name
         "Enhancement spot
-        LEFT JOIN enhspotheader ON enhspotheader~enhspot = tadir~obj_name
+        LEFT JOIN enhspotheader ON tadir~object = @c_ext_type-enhancement_spot AND enhspotheader~enhspot = tadir~obj_name
         LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
         LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
         "Composite enhancement spot
-        LEFT JOIN enhspotcomphead ON enhspotcomphead~enhspotcomposite = tadir~obj_name
+        LEFT JOIN enhspotcomphead ON tadir~object = @c_ext_type-composite_enhancement AND enhspotcomphead~enhspotcomposite = tadir~obj_name
         LEFT JOIN sotr_text AS sotr_text_comp ON sotr_text~concept = enhspotcomphead~shorttextid AND sotr_text~langu = @sy-langu
       FIELDS DISTINCT tadir~devclass, tadir~object AS enhancement_type, tadir~obj_name AS enhancement_name,
           "User-Exit
@@ -120,11 +120,11 @@ CLASS lcl_report IMPLEMENTATION.
           CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active,
           "Composite enhancement spot
           sotr_text_comp~text AS com_enhancement_spot_descr
-      WHERE tadir~pgmid            = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
-        AND tadir~object          IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
-        AND tadir~obj_name        IN @s_uename AND tadir~obj_name IN @s_badina
-        AND modact~name           IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim
-        AND enhspotheader~enhspot IN @s_enhnam AND enhheader~enhname IN @s_enhimp
+      WHERE tadir~pgmid = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
+        AND tadir~object IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
+        AND modsapt~name IN @s_uename AND sxs_attr~exit_name IN @s_badina
+        AND enhspotheader~enhspot IN @s_enhnam AND enhspotcomphead~enhspotcomposite IN @s_cenhna
+        AND modact~name IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim AND enhheader~enhname IN @s_enhimp
       INTO CORRESPONDING FIELDS OF TABLE @enhancements.
   ENDMETHOD.
 
@@ -133,18 +133,18 @@ CLASS lcl_report IMPLEMENTATION.
     IF enhancement-enhancement_type = c_ext_type-user_exit.
       output_line-description                  = enhancement-user_exit_description.
       output_line-implementation               = enhancement-user_exit_implementation.
-      output_line-is_active                    = COND #( WHEN enhancement-is_user_exit_active = abap_false THEN abap_false ELSE abap_true ).
+      output_line-is_active                    = enhancement-is_user_exit_active .
       output_line-enhancement_type_description = TEXT-e01.
     ELSEIF enhancement-enhancement_type = c_ext_type-badi.
       output_line-description                  = enhancement-badi_description.
       output_line-implementation               = enhancement-badi_implementation.
-      output_line-is_active                    = COND #( WHEN enhancement-is_badi_active = abap_false THEN abap_false ELSE abap_true ).
+      output_line-is_active                    = enhancement-is_badi_active.
       output_line-is_sap_internal              = enhancement-is_badi_sap_internal.
       output_line-enhancement_type_description = TEXT-e02.
     ELSEIF enhancement-enhancement_type = c_ext_type-enhancement_spot.
       output_line-description                  = enhancement-enhancement_spot_description.
       output_line-implementation               = enhancement-enhancement_spot_impl.
-      output_line-is_active                    = COND #( WHEN enhancement-is_enhancement_spot_active = abap_false THEN abap_false ELSE abap_true ).
+      output_line-is_active                    = enhancement-is_enhancement_spot_active.
       output_line-is_sap_internal              = enhancement-is_enhancement_spot_sap_int.
       output_line-enhancement_type_description = TEXT-e03.
     ELSEIF enhancement-enhancement_type = c_ext_type-composite_enhancement.

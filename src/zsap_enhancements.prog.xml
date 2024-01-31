@@ -124,6 +124,13 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>S_CENHNA</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>S_DEVCLA</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
@@ -276,6 +283,13 @@
       <item>
        <ID>S</ID>
        <KEY>S_BADINA</KEY>
+       <ENTRY>.</ENTRY>
+       <LENGTH>9</LENGTH>
+       <SPLIT>D</SPLIT>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>S_CENHNA</KEY>
        <ENTRY>.</ENTRY>
        <LENGTH>9</LENGTH>
        <SPLIT>D</SPLIT>
