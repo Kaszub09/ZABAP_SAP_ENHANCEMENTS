@@ -24,6 +24,7 @@
       enhancement_spot_impl        TYPE enhname,
       is_enhancement_spot_active   TYPE abap_bool,
       is_enhancement_spot_sap_int  TYPE enhboolean,
+      comp_enhancement_spot_desc   TYPE sotr_txt,
     END OF t_enhancements,
     tt_enhancements TYPE SORTED TABLE OF t_enhancements WITH NON-UNIQUE KEY devclass,
 
@@ -37,7 +38,7 @@
       description                  TYPE string,
       implementation               TYPE string,
       is_active                    TYPE abap_bool,
-      is_sap_internal         TYPE abap_bool,
+      is_sap_internal              TYPE abap_bool,
       color                        TYPE lvc_t_scol,
     END OF t_output,
     tt_output TYPE STANDARD TABLE OF t_output.

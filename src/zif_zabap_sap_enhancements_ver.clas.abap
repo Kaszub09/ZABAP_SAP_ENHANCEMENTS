@@ -5,7 +5,7 @@ CLASS zif_zabap_sap_enhancements_ver DEFINITION
 
   PUBLIC SECTION.
     CONSTANTS:
-        c_version TYPE string VALUE '1.1.0'.
+        c_version TYPE string VALUE '1.1.1'.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.

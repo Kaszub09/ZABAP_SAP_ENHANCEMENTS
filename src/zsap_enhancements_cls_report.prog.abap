@@ -104,6 +104,9 @@ CLASS lcl_report IMPLEMENTATION.
         LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
         LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
+        "Composite enhancement spot
+        LEFT JOIN enhspotcomphead ON enhspotcomphead~enhspotcomposite = tadir~obj_name
+        LEFT JOIN sotr_text AS sotr_text_comp ON sotr_text~concept = enhspotcomphead~shorttextid AND sotr_text~langu = @sy-langu
       FIELDS DISTINCT tadir~devclass, tadir~object AS enhancement_type, tadir~obj_name AS enhancement_name,
           "User-Exit
           modsapt~modtext AS user_exit_description,  modact~name AS user_exit_implementation,
@@ -114,7 +117,9 @@ CLASS lcl_report IMPLEMENTATION.
           "Enhancement spot
           sotr_text~text AS enhancement_spot_description, enhspotheader~internal AS is_enhancement_spot_sap_int,
           enhobj~enhname AS enhancement_spot_impl,
-          CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
+          CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active,
+          "Composite enhancement spot
+          sotr_text_comp~text AS com_enhancement_spot_descr
       WHERE tadir~pgmid            = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
         AND tadir~object          IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
         AND tadir~obj_name        IN @s_uename AND tadir~obj_name IN @s_badina
@@ -143,6 +148,7 @@ CLASS lcl_report IMPLEMENTATION.
       output_line-is_sap_internal              = enhancement-is_enhancement_spot_sap_int.
       output_line-enhancement_type_description = TEXT-e03.
     ELSEIF enhancement-enhancement_type = c_ext_type-composite_enhancement.
+      output_line-description                  = enhancement-comp_enhancement_spot_desc.
       output_line-enhancement_type_description = TEXT-e04.
     ENDIF.
   ENDMETHOD.
