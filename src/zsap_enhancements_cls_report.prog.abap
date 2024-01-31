@@ -88,17 +88,29 @@ CLASS lcl_report IMPLEMENTATION.
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     SELECT FROM tadir
+    "User-Exit
         LEFT JOIN modsapt ON modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
         LEFT JOIN modact ON modact~member = tadir~obj_name
         LEFT JOIN modattr ON modattr~name = modsapt~name
+        "BADI
         LEFT JOIN sxs_attr ON sxs_attr~exit_name = tadir~obj_name
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
         LEFT JOIN sxc_exit ON sxc_exit~exit_name = sxs_attrt~exit_name
         LEFT JOIN sxc_attr ON sxc_attr~imp_name = sxc_exit~imp_name
-      FIELDS DISTINCT tadir~devclass, object AS enhancement_type, obj_name AS enhancement_name,
+        "Enhancement spot
+        LEFT JOIN enhspotheader ON enhspotheader~enhspot = tadir~obj_name
+        LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
+        LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
+        LEFT JOIN enhheader ON enhheader~enhname  = enhobj~enhname
+      FIELDS DISTINCT tadir~devclass, tadir~object AS enhancement_type, tadir~obj_name AS enhancement_name,
+          "User-Exit
           modsapt~modtext AS user_exit_description,  modact~name AS user_exit_implementation, modattr~status AS is_user_exit_active,
+          "BADI
           sxs_attrt~text AS badi_description, sxs_attr~internal AS is_badi_sap_internal,
-          sxc_exit~imp_name AS badi_implementation, sxc_attr~active AS is_badi_active
+          sxc_exit~imp_name AS badi_implementation, sxc_attr~active AS is_badi_active,
+          "Enhancement spot
+          sotr_text~text as enhancement_spot_description, enhspotheader~internal as is_enhancement_spot_sap_int,
+          enhobj~enhname as enhancement_spot_impl, enhheader~version as is_enhancement_spot_active
       WHERE tadir~pgmid     = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
         AND tadir~object   IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
         AND tadir~obj_name IN @s_uename AND tadir~obj_name IN @s_badina
