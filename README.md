@@ -11,7 +11,7 @@ Report is based on https://community.sap.com/t5/enterprise-resource-planning-blo
 - Shows User-Exits, BADIs, Enhancement Spots, Composite Enhancements Spots, as well as implementations
 - Shows all implementation for given enhancement - as well as information, whether it's active and if it's SAP BADI for internal use only
 - You can double click both enhancement name or implementation name to display given object
-- 3 colors: green or active implementation, blue for inactive, and orange for internal SAP BADIs
+- 3 colors: green or active implementation, blue for inactive, and orange for internal SAP enhancements
 
 ## Installation
 Through abapGit https://github.com/abapGit/abapGit. Install this project after installing https://github.com/Kaszub09/ZABAP_SALV_REPORT.
