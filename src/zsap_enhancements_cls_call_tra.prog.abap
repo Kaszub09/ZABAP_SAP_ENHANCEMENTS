@@ -13,7 +13,8 @@ CLASS  lcl_enhancement_transaction DEFINITION CREATE PUBLIC.
       show_enhancement_spot IMPORTING name TYPE string,
       show_composite_enhancement IMPORTING name TYPE string,
       show_user_exit_implementation IMPORTING name TYPE string,
-      show_badi_implementation IMPORTING name TYPE string.
+      show_badi_implementation IMPORTING name TYPE string,
+      show_enhancement_spot_impl IMPORTING name TYPE string.
 ENDCLASS.
 
 CLASS lcl_enhancement_transaction IMPLEMENTATION.
@@ -62,6 +63,17 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=SHOW' ) TO batch_input.
 
     CALL TRANSACTION 'SE18' USING batch_input MODE 'E' UPDATE 'S'.
+  ENDMETHOD.
+
+  METHOD show_enhancement_spot_impl.
+    DATA batch_input TYPE TABLE OF bdcdata.
+    APPEND VALUE #( program = 'SAPLSEXO' dynpro = '0120' dynbegin = 'X' fnam = 'BDC_CURSOR' fval = 'G_IS_NEW_1'  ) TO batch_input.
+    APPEND VALUE #( fnam = 'G_IS_NEW_1' fval = 'X' ) TO batch_input.
+    APPEND VALUE #( program = 'SAPLSEXO' dynpro = '0120' dynbegin = 'X' fnam = 'BDC_CURSOR' fval = 'G_ENHNAME'  ) TO batch_input.
+    APPEND VALUE #( fnam = 'G_ENHNAME' fval = name ) TO batch_input.
+    APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=IMP_SHOW' ) TO batch_input.
+
+    CALL TRANSACTION 'SE19' USING batch_input MODE 'E' UPDATE 'S'.
   ENDMETHOD.
 
   METHOD show_user_exit.

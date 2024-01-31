@@ -191,6 +191,7 @@ CLASS lcl_report IMPLEMENTATION.
       CASE row_data->enhancement_type.
         WHEN c_ext_type-user_exit. enhancement_transaction->show_user_exit_implementation( row_data->implementation ).
         WHEN c_ext_type-badi. enhancement_transaction->show_badi_implementation( row_data->implementation ).
+        WHEN c_ext_type-enhancement_spot. enhancement_transaction->show_enhancement_spot_impl( row_data->implementation ).
       ENDCASE.
 
     ENDIF.
