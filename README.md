@@ -2,7 +2,7 @@
 Report to show enhancements in SAP programs available for user
 
 ![obraz](https://github.com/Kaszub09/ZABAP_SAP_ENHANCEMENTS/assets/34368953/fd3ca469-4272-4547-8520-4b26c5aac87d)
-![obraz](https://github.com/Kaszub09/ZABAP_SAP_ENHANCEMENTS/assets/34368953/83873223-90b1-4422-8ce9-c16367e4a2f9)
+![obraz](https://github.com/Kaszub09/ZABAP_SAP_ENHANCEMENTS/assets/34368953/7ffd6504-3630-4262-aeed-94818412b071)
 ![obraz](https://github.com/Kaszub09/ZABAP_SAP_ENHANCEMENTS/assets/34368953/1cd828c6-997f-4678-995b-5745eca929b1)
 
 ## Features
