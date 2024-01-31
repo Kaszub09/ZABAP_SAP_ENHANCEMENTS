@@ -3,6 +3,8 @@
 *&---------------------------------------------------------------------*
 
 TABLES: tstc,tadir, modsap, modact, sxs_attrt,sxc_exit.
+DATA enhheader TYPE enhheader.
+DATA enhspotheader TYPE enhspotheader.
 
 SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE TEXT-s01.
 SELECT-OPTIONS:
@@ -10,13 +12,15 @@ SELECT-OPTIONS:
   s_pgmna FOR tstc-pgmna,
   s_devcla FOR tadir-devclass,
   s_uename FOR modsap-name,
-  s_badina FOR sxs_attrt-exit_name.
+  s_badina FOR sxs_attrt-exit_name,
+  s_enhnam FOR enhspotheader-enhspot.
 SELECTION-SCREEN END OF BLOCK b01.
 
 SELECTION-SCREEN BEGIN OF BLOCK b02 WITH FRAME TITLE TEXT-s02.
 SELECT-OPTIONS:
   s_ueimpl FOR modact-name,
-  s_badiim FOR sxc_exit-imp_name.
+  s_badiim FOR sxc_exit-imp_name,
+  s_enhimp FOR enhheader-enhname.
 SELECTION-SCREEN END OF BLOCK b02.
 
 SELECTION-SCREEN BEGIN OF BLOCK b03 WITH FRAME TITLE TEXT-s03.

@@ -35,7 +35,6 @@ ENDCLASS.
 
 CLASS lcl_report IMPLEMENTATION.
   METHOD prepare_report.
-
     DATA(filter_by_program) = xsdbool( lines( s_tcode ) > 0 OR lines( s_pgmna ) > 0 ).
 
     "Either get enhancements filtered by devclasses or just get all by name/implementation
@@ -43,7 +42,6 @@ CLASS lcl_report IMPLEMENTATION.
       DATA(devclasses) = get_devclasses( ).
     ENDIF.
     DATA(enhacements) = get_enhancements( devclasses ).
-
 
     "Create output from enhancements
     LOOP AT enhacements REFERENCE INTO DATA(enhancement).
@@ -59,7 +57,10 @@ CLASS lcl_report IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    SORT output BY transaction program enhancement_type enhancement_name.
+    SORT output BY transaction
+                   program
+                   enhancement_type
+                   enhancement_name.
     set_data( EXPORTING create_table_copy = abap_false CHANGING data_table = output ).
 
     prepare_columns( ).
@@ -71,7 +72,7 @@ CLASS lcl_report IMPLEMENTATION.
     "TRDIR
     "TFDIR - function modules group
     "ENLFDIR - funciton modules additional attributes
-    "GET CLASSES, try by progrma or function group belonging to program
+    "Get devclasses, try by program or function group belonging to program
     SELECT FROM tstc
         LEFT JOIN tadir ON tadir~pgmid = 'R3TR' AND tadir~object = 'PROG' AND tadir~obj_name = tstc~pgmna
         LEFT JOIN trdir ON trdir~name = tstc~pgmna AND trdir~subc = 'F'
@@ -85,24 +86,40 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD get_enhancements.
     DATA devclasses_range TYPE RANGE OF devclass.
+
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     SELECT FROM tadir
+        "User-Exit
         LEFT JOIN modsapt ON modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
         LEFT JOIN modact ON modact~member = tadir~obj_name
         LEFT JOIN modattr ON modattr~name = modsapt~name
+        "BADI
         LEFT JOIN sxs_attr ON sxs_attr~exit_name = tadir~obj_name
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
         LEFT JOIN sxc_exit ON sxc_exit~exit_name = sxs_attrt~exit_name
         LEFT JOIN sxc_attr ON sxc_attr~imp_name = sxc_exit~imp_name
-      FIELDS DISTINCT tadir~devclass, object AS enhancement_type, obj_name AS enhancement_name,
-          modsapt~modtext AS user_exit_description,  modact~name AS user_exit_implementation, modattr~status AS is_user_exit_active,
+        "Enhancement spot
+        LEFT JOIN enhspotheader ON enhspotheader~enhspot = tadir~obj_name
+        LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
+        LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
+        LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
+      FIELDS DISTINCT tadir~devclass, tadir~object AS enhancement_type, tadir~obj_name AS enhancement_name,
+          "User-Exit
+          modsapt~modtext AS user_exit_description,  modact~name AS user_exit_implementation,
+          CASE WHEN modattr~status = 'A' THEN @abap_true ELSE @abap_false END AS is_user_exit_active,
+          "BADI
           sxs_attrt~text AS badi_description, sxs_attr~internal AS is_badi_sap_internal,
-          sxc_exit~imp_name AS badi_implementation, sxc_attr~active AS is_badi_active
-      WHERE tadir~pgmid     = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
-        AND tadir~object   IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
-        AND tadir~obj_name IN @s_uename AND tadir~obj_name IN @s_badina
-        AND modact~name    IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim
+          sxc_exit~imp_name AS badi_implementation, CASE WHEN sxc_attr~active = 'X' THEN @abap_true ELSE @abap_false END AS is_badi_active,
+          "Enhancement spot
+          sotr_text~text AS enhancement_spot_description, enhspotheader~internal AS is_enhancement_spot_sap_int,
+          enhobj~enhname AS enhancement_spot_impl,
+          CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
+      WHERE tadir~pgmid            = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
+        AND tadir~object          IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
+        AND tadir~obj_name        IN @s_uename AND tadir~obj_name IN @s_badina
+        AND modact~name           IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim
+        AND enhspotheader~enhspot IN @s_enhnam AND enhheader~enhname IN @s_enhimp
       INTO CORRESPONDING FIELDS OF TABLE @enhancements.
   ENDMETHOD.
 
@@ -117,9 +134,13 @@ CLASS lcl_report IMPLEMENTATION.
       output_line-description                  = enhancement-badi_description.
       output_line-implementation               = enhancement-badi_implementation.
       output_line-is_active                    = COND #( WHEN enhancement-is_badi_active = abap_false THEN abap_false ELSE abap_true ).
-      output_line-is_badi_sap_internal         = enhancement-is_badi_sap_internal.
+      output_line-is_sap_internal              = enhancement-is_badi_sap_internal.
       output_line-enhancement_type_description = TEXT-e02.
     ELSEIF enhancement-enhancement_type = c_ext_type-enhancement_spot.
+      output_line-description                  = enhancement-enhancement_spot_description.
+      output_line-implementation               = enhancement-enhancement_spot_impl.
+      output_line-is_active                    = COND #( WHEN enhancement-is_enhancement_spot_active = abap_false THEN abap_false ELSE abap_true ).
+      output_line-is_sap_internal              = enhancement-is_enhancement_spot_sap_int.
       output_line-enhancement_type_description = TEXT-e03.
     ELSEIF enhancement-enhancement_type = c_ext_type-composite_enhancement.
       output_line-enhancement_type_description = TEXT-e04.
@@ -129,9 +150,9 @@ CLASS lcl_report IMPLEMENTATION.
   METHOD color_output.
     IF NOT output_line-implementation IS INITIAL.
       APPEND VALUE #( fname = c_col-implementation color = VALUE #( col = COND #( WHEN output_line-is_active = abap_true THEN 5 ELSE 1 )
-                                                                      ) ) TO output_line-color.
+                                                                  ) ) TO output_line-color.
     ENDIF.
-    IF output_line-is_badi_sap_internal = abap_true.
+    IF output_line-is_sap_internal = abap_true.
       APPEND VALUE #( fname = c_col-name color = VALUE #( col = 7 ) ) TO output_line-color.
     ENDIF.
   ENDMETHOD.
@@ -141,7 +162,7 @@ CLASS lcl_report IMPLEMENTATION.
     set_fixed_column_text( column = 'IMPLEMENTATION' text = TEXT-c02 ).
     set_fixed_column_text( column = 'ENHANCEMENT_TYPE_DESCRIPTION' text = TEXT-c03 ).
     set_fixed_column_text( column = 'IS_ACTIVE' text = TEXT-c04 ).
-    set_fixed_column_text( column = 'IS_BADI_SAP_INTERNAL' text = TEXT-c05 ).
+    set_fixed_column_text( column = 'IS_SAP_INTERNAL' text = TEXT-c05 ).
 
     hide_column( 'ENHANCEMENT_TYPE' ).
 
@@ -173,10 +194,9 @@ CLASS lcl_report IMPLEMENTATION.
       CASE row_data->enhancement_type.
         WHEN c_ext_type-user_exit. enhancement_transaction->show_user_exit_implementation( row_data->implementation ).
         WHEN c_ext_type-badi. enhancement_transaction->show_badi_implementation( row_data->implementation ).
+        WHEN c_ext_type-enhancement_spot. enhancement_transaction->show_enhancement_spot_impl( row_data->implementation ).
       ENDCASE.
 
     ENDIF.
   ENDMETHOD.
-
-
 ENDCLASS.
