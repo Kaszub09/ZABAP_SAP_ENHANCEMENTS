@@ -95,11 +95,11 @@ CLASS lcl_report IMPLEMENTATION.
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
         LEFT JOIN sxc_exit ON sxc_exit~exit_name = sxs_attrt~exit_name
         LEFT JOIN sxc_attr ON sxc_attr~imp_name = sxc_exit~imp_name
-      FIELDS tadir~devclass, object AS enhancement_type, obj_name AS enhancement_name,
+      FIELDS DISTINCT tadir~devclass, object AS enhancement_type, obj_name AS enhancement_name,
           modsapt~modtext AS user_exit_description,  modact~name AS user_exit_implementation, modattr~status AS is_user_exit_active,
           sxs_attrt~text AS badi_description, sxs_attr~internal AS is_badi_sap_internal,
           sxc_exit~imp_name AS badi_implementation, sxc_attr~active AS is_badi_active
-      WHERE tadir~pgmid     = 'R3TR' AND tadir~devclass IN @devclasses_range and tadir~devclass in @s_devcla
+      WHERE tadir~pgmid     = 'R3TR' AND tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
         AND tadir~object   IN ( @c_ext_type-user_exit, @c_ext_type-badi, @c_ext_type-enhancement_spot, @c_ext_type-composite_enhancement )
         AND tadir~obj_name IN @s_uename AND tadir~obj_name IN @s_badina
         AND modact~name    IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim
