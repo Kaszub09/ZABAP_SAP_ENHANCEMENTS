@@ -63,10 +63,7 @@ CLASS lcl_report IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    SORT output BY transaction
-                   program
-                   enhancement_type
-                   enhancement_name.
+    SORT output BY transaction program enhancement_type enhancement_name implementation.
     set_data( EXPORTING create_table_copy = abap_false CHANGING data_table = output ).
 
     prepare_columns( ).
