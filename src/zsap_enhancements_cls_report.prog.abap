@@ -27,6 +27,7 @@ CLASS lcl_report DEFINITION INHERITING FROM zcl_zabap_salv_report.
     METHODS:
       get_devclasses RETURNING VALUE(devclasses) TYPE tt_devclasses,
       get_enhancements IMPORTING devclasses TYPE tt_devclasses RETURNING VALUE(enhancements) TYPE tt_enhancements,
+      append_implicit_enhancements IMPORTING devclasses TYPE tt_devclasses CHANGING enhancements TYPE tt_enhancements,
       get_output_line IMPORTING enhancement TYPE t_enhancements RETURNING VALUE(output_line) TYPE t_output,
       color_output CHANGING output_line TYPE t_output,
       prepare_columns.
@@ -86,7 +87,6 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD get_enhancements.
     DATA devclasses_range TYPE RANGE OF devclass.
-
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     SELECT FROM tadir
@@ -126,6 +126,22 @@ CLASS lcl_report IMPLEMENTATION.
         AND enhspotheader~enhspot IN @s_enhnam AND enhspotcomphead~enhspotcomposite IN @s_cenhna
         AND modact~name IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim AND enhheader~enhname IN @s_enhimp
       INTO CORRESPONDING FIELDS OF TABLE @enhancements.
+  ENDMETHOD.
+
+  METHOD append_implicit_enhancements.
+    DATA devclasses_range TYPE RANGE OF devclass.
+    devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
+
+    DATA implementations_to_exclude TYPE RANGE OF enhname.
+    implementations_to_exclude = VALUE #( FOR line IN enhancements  ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
+
+    SELECT FROM enhobj
+        LEFT JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
+        LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
+    FIELDS DISTINCT  tadir~devclass, enhobj~enhname AS enhancement_spot_impl,
+              CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
+    WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla AND enhobj~enhname IN @implementations_to_exclude
+    APPENDING CORRESPONDING FIELDS OF TABLE @enhancements.
   ENDMETHOD.
 
   METHOD get_output_line.
@@ -205,4 +221,6 @@ CLASS lcl_report IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
+
+
 ENDCLASS.
