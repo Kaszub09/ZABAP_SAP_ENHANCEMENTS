@@ -42,11 +42,11 @@ CLASS lcl_report IMPLEMENTATION.
     IF filter_by_program = abap_true.
       DATA(devclasses) = get_devclasses( ).
     ENDIF.
-    DATA(enhacements) = get_enhancements( devclasses ).
-    append_implicit_enhancements( exporting devclasses = devclasses changing enhancements = enhacements ).
+    DATA(enhancements) = get_enhancements( devclasses ).
+    append_implicit_enhancements( exporting devclasses = devclasses changing enhancements = enhancements ).
 
     "Create output from enhancements
-    LOOP AT enhacements REFERENCE INTO DATA(enhancement).
+    LOOP AT enhancements REFERENCE INTO DATA(enhancement).
       DATA(output_line) = get_output_line( enhancement->* ).
       color_output( CHANGING output_line = output_line ).
 
