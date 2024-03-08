@@ -139,8 +139,8 @@ CLASS lcl_report IMPLEMENTATION.
         ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
 
     SELECT FROM enhobj
-        LEFT JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
-        LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
+        INNER JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
+        INNER JOIN enhheader ON enhheader~enhname = enhobj~enhname
     FIELDS DISTINCT tadir~devclass, @c_ext_type-enhancement_spot AS enhancement_type, enhobj~enhname AS enhancement_spot_impl,
         CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
     WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
