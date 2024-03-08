@@ -43,7 +43,11 @@ CLASS lcl_report IMPLEMENTATION.
       DATA(devclasses) = get_devclasses( ).
     ENDIF.
     DATA(enhancements) = get_enhancements( devclasses ).
-    append_implicit_enhancements( exporting devclasses = devclasses changing enhancements = enhancements ).
+
+    "Append implicit enhancements implementations - they weren't caught earlier
+    IF p_impenh = abap_true.
+      append_implicit_enhancements( EXPORTING devclasses = devclasses CHANGING enhancements = enhancements ).
+    ENDIF.
 
     "Create output from enhancements
     LOOP AT enhancements REFERENCE INTO DATA(enhancement).
@@ -139,7 +143,7 @@ CLASS lcl_report IMPLEMENTATION.
     SELECT FROM enhobj
         LEFT JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
-    FIELDS DISTINCT tadir~devclass, @c_ext_type-enhancement_spot as enhancement_type, enhobj~enhname AS enhancement_spot_impl,
+    FIELDS DISTINCT tadir~devclass, @c_ext_type-enhancement_spot AS enhancement_type, enhobj~enhname AS enhancement_spot_impl,
         CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
     WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
         AND enhobj~enhname IN @implementations_to_exclude AND enhobj~enhname IN @s_enhimp

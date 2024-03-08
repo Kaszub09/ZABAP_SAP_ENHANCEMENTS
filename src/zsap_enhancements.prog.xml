@@ -103,6 +103,12 @@
     </item>
     <item>
      <ID>S</ID>
+     <KEY>P_IMPENH</KEY>
+     <ENTRY>Add implicit enh. impl.</ENTRY>
+     <LENGTH>31</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
      <KEY>P_LAYOUT</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
