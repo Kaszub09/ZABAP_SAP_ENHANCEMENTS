@@ -138,7 +138,8 @@ CLASS lcl_report IMPLEMENTATION.
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     DATA implementations_to_exclude TYPE RANGE OF enhname.
-    implementations_to_exclude = VALUE #( FOR line IN enhancements  ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
+    implementations_to_exclude = VALUE #( FOR line IN enhancements where ( enhancement_type = c_ext_type-enhancement_spot )
+        ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
 
     SELECT FROM enhobj
         LEFT JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
