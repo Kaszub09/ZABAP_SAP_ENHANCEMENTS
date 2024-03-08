@@ -95,7 +95,7 @@ CLASS lcl_report IMPLEMENTATION.
         "User-Exit
         LEFT JOIN modsapt ON tadir~object = @c_ext_type-user_exit AND modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
         LEFT JOIN modact ON tadir~object = @c_ext_type-user_exit AND modact~member = tadir~obj_name
-        LEFT JOIN modattr ON modattr~name = modsapt~name
+        LEFT JOIN modattr ON modattr~name = modact~name
         "BADI
         LEFT JOIN sxs_attr ON tadir~object = @c_ext_type-badi AND sxs_attr~exit_name = tadir~obj_name
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
