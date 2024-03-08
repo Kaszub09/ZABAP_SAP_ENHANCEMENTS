@@ -104,7 +104,7 @@ CLASS lcl_report IMPLEMENTATION.
         "Enhancement spot
         LEFT JOIN enhspotheader ON tadir~object = @c_ext_type-enhancement_spot AND enhspotheader~enhspot = tadir~obj_name
         LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
-        LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
+        LEFT JOIN enhobj ON tadir~object = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
         "Composite enhancement spot
         LEFT JOIN enhspotcomphead ON tadir~object = @c_ext_type-composite_enhancement AND enhspotcomphead~enhspotcomposite = tadir~obj_name
