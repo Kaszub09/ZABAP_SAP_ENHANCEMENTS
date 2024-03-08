@@ -43,6 +43,7 @@ CLASS lcl_report IMPLEMENTATION.
       DATA(devclasses) = get_devclasses( ).
     ENDIF.
     DATA(enhacements) = get_enhancements( devclasses ).
+    append_implicit_enhancements( exporting devclasses = devclasses changing enhancements = enhacements ).
 
     "Create output from enhancements
     LOOP AT enhacements REFERENCE INTO DATA(enhancement).
