@@ -141,7 +141,8 @@ CLASS lcl_report IMPLEMENTATION.
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
     FIELDS DISTINCT tadir~devclass, @c_ext_type-enhancement_spot as enhancement_type, enhobj~enhname AS enhancement_spot_impl,
         CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
-    WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla AND enhobj~enhname IN @implementations_to_exclude
+    WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
+        AND enhobj~enhname IN @implementations_to_exclude AND enhobj~enhname IN @s_enhimp
     APPENDING CORRESPONDING FIELDS OF TABLE @enhancements.
   ENDMETHOD.
 
