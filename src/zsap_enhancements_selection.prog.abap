@@ -23,7 +23,7 @@ SELECT-OPTIONS:
   s_ueimpl FOR modact-name,
   s_badiim FOR sxc_exit-imp_name,
   s_enhimp FOR enhheader-enhname.
-PARAMETERS: p_impenh AS CHECKBOX default abap_true.
+PARAMETERS: p_impenh AS CHECKBOX DEFAULT abap_true.
 SELECTION-SCREEN END OF BLOCK b02.
 
 SELECTION-SCREEN BEGIN OF BLOCK b03 WITH FRAME TITLE TEXT-s03.
