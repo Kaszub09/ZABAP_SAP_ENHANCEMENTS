@@ -27,6 +27,7 @@ CLASS lcl_report DEFINITION INHERITING FROM zcl_zabap_salv_report.
     METHODS:
       get_devclasses RETURNING VALUE(devclasses) TYPE tt_devclasses,
       get_enhancements IMPORTING devclasses TYPE tt_devclasses RETURNING VALUE(enhancements) TYPE tt_enhancements,
+      append_implicit_enhancements IMPORTING devclasses TYPE tt_devclasses CHANGING enhancements TYPE tt_enhancements,
       get_output_line IMPORTING enhancement TYPE t_enhancements RETURNING VALUE(output_line) TYPE t_output,
       color_output CHANGING output_line TYPE t_output,
       prepare_columns.
@@ -41,10 +42,15 @@ CLASS lcl_report IMPLEMENTATION.
     IF filter_by_program = abap_true.
       DATA(devclasses) = get_devclasses( ).
     ENDIF.
-    DATA(enhacements) = get_enhancements( devclasses ).
+    DATA(enhancements) = get_enhancements( devclasses ).
+
+    "Append implicit enhancements implementations - they weren't caught earlier
+    IF p_impenh = abap_true.
+      append_implicit_enhancements( EXPORTING devclasses = devclasses CHANGING enhancements = enhancements ).
+    ENDIF.
 
     "Create output from enhancements
-    LOOP AT enhacements REFERENCE INTO DATA(enhancement).
+    LOOP AT enhancements REFERENCE INTO DATA(enhancement).
       DATA(output_line) = get_output_line( enhancement->* ).
       color_output( CHANGING output_line = output_line ).
 
@@ -57,10 +63,7 @@ CLASS lcl_report IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    SORT output BY transaction
-                   program
-                   enhancement_type
-                   enhancement_name.
+    SORT output BY transaction program enhancement_type enhancement_name implementation.
     set_data( EXPORTING create_table_copy = abap_false CHANGING data_table = output ).
 
     prepare_columns( ).
@@ -86,14 +89,13 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD get_enhancements.
     DATA devclasses_range TYPE RANGE OF devclass.
-
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     SELECT FROM tadir
         "User-Exit
         LEFT JOIN modsapt ON tadir~object = @c_ext_type-user_exit AND modsapt~sprsl = @sy-langu AND modsapt~name = tadir~obj_name
         LEFT JOIN modact ON tadir~object = @c_ext_type-user_exit AND modact~member = tadir~obj_name
-        LEFT JOIN modattr ON modattr~name = modsapt~name
+        LEFT JOIN modattr ON modattr~name = modact~name
         "BADI
         LEFT JOIN sxs_attr ON tadir~object = @c_ext_type-badi AND sxs_attr~exit_name = tadir~obj_name
         LEFT JOIN sxs_attrt ON sxs_attrt~sprsl = @sy-langu AND sxs_attrt~exit_name = sxs_attr~exit_name
@@ -102,7 +104,7 @@ CLASS lcl_report IMPLEMENTATION.
         "Enhancement spot
         LEFT JOIN enhspotheader ON tadir~object = @c_ext_type-enhancement_spot AND enhspotheader~enhspot = tadir~obj_name
         LEFT JOIN sotr_text ON sotr_text~concept = enhspotheader~shorttextid AND sotr_text~langu = @sy-langu
-        LEFT JOIN enhobj ON enhobj~main_type = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
+        LEFT JOIN enhobj ON tadir~object = @c_ext_type-enhancement_spot AND enhobj~main_name = tadir~obj_name
         LEFT JOIN enhheader ON enhheader~enhname = enhobj~enhname
         "Composite enhancement spot
         LEFT JOIN enhspotcomphead ON tadir~object = @c_ext_type-composite_enhancement AND enhspotcomphead~enhspotcomposite = tadir~obj_name
@@ -126,6 +128,24 @@ CLASS lcl_report IMPLEMENTATION.
         AND enhspotheader~enhspot IN @s_enhnam AND enhspotcomphead~enhspotcomposite IN @s_cenhna
         AND modact~name IN @s_ueimpl AND sxc_exit~imp_name IN @s_badiim AND enhheader~enhname IN @s_enhimp
       INTO CORRESPONDING FIELDS OF TABLE @enhancements.
+  ENDMETHOD.
+
+  METHOD append_implicit_enhancements.
+    DATA devclasses_range TYPE RANGE OF devclass.
+    devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
+
+    DATA implementations_to_exclude TYPE RANGE OF enhname.
+    implementations_to_exclude = VALUE #( FOR line IN enhancements where ( enhancement_type = c_ext_type-enhancement_spot )
+        ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
+
+    SELECT FROM enhobj
+        INNER JOIN tadir ON tadir~pgmid = enhobj~pgmid AND tadir~object = enhobj~main_type AND tadir~obj_name = enhobj~main_name
+        INNER JOIN enhheader ON enhheader~enhname = enhobj~enhname
+    FIELDS DISTINCT tadir~devclass, @c_ext_type-enhancement_spot AS enhancement_type, enhobj~enhname AS enhancement_spot_impl,
+        CASE WHEN enhheader~version = 'A' THEN @abap_true ELSE @abap_false END AS is_enhancement_spot_active
+    WHERE tadir~devclass IN @devclasses_range AND tadir~devclass IN @s_devcla
+        AND enhobj~enhname IN @implementations_to_exclude AND enhobj~enhname IN @s_enhimp
+    APPENDING CORRESPONDING FIELDS OF TABLE @enhancements.
   ENDMETHOD.
 
   METHOD get_output_line.
@@ -205,4 +225,6 @@ CLASS lcl_report IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
+
+
 ENDCLASS.
