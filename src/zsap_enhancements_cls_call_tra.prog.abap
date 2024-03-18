@@ -8,6 +8,7 @@
 CLASS  lcl_enhancement_transaction DEFINITION CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS:
+      constructor,
       show_user_exit IMPORTING name TYPE string,
       show_badi IMPORTING name TYPE string,
       show_enhancement_spot IMPORTING name TYPE string,
@@ -15,9 +16,17 @@ CLASS  lcl_enhancement_transaction DEFINITION CREATE PUBLIC.
       show_user_exit_implementation IMPORTING name TYPE string,
       show_badi_implementation IMPORTING name TYPE string,
       show_enhancement_spot_impl IMPORTING name TYPE string.
+  PRIVATE SECTION.
+    DATA:
+        "! I don't think you can have constant structure based on DDIC type?
+        call_options TYPE ctu_params.
 ENDCLASS.
 
 CLASS lcl_enhancement_transaction IMPLEMENTATION.
+  METHOD constructor.
+    call_options = VALUE ctu_params( dismode = 'E' updmode  = 'A' nobinpt = abap_true nobiend = abap_true ).
+  ENDMETHOD.
+
   METHOD show_badi.
     DATA batch_input TYPE TABLE OF bdcdata.
 
@@ -27,7 +36,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'G_BADINAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'SE18' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SE18' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_badi_implementation.
@@ -38,7 +47,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'RSEXSCRN-IMP_NAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=IMP_SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'SE19' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SE19' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_composite_enhancement.
@@ -50,7 +59,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'RSEUX-CXT_VALUE' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=DISPLAY' ) TO batch_input.
 
-    CALL TRANSACTION 'SE20' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SE20' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_enhancement_spot.
@@ -62,7 +71,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'G_ENHSPOTNAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'SE18' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SE18' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_enhancement_spot_impl.
@@ -73,7 +82,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'G_ENHNAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=IMP_SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'SE19' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SE19' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_user_exit.
@@ -85,7 +94,7 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'MOD0-NAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'SMOD' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'SMOD' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
 
   METHOD show_user_exit_implementation.
@@ -97,7 +106,9 @@ CLASS lcl_enhancement_transaction IMPLEMENTATION.
     APPEND VALUE #( fnam = 'MOD0-NAME' fval = name ) TO batch_input.
     APPEND VALUE #( fnam = 'BDC_OKCODE' fval = '=SHOW' ) TO batch_input.
 
-    CALL TRANSACTION 'CMOD' USING batch_input MODE 'E' UPDATE 'S'.
+    CALL TRANSACTION 'CMOD' USING batch_input OPTIONS FROM call_options.
   ENDMETHOD.
+
+
 
 ENDCLASS.
