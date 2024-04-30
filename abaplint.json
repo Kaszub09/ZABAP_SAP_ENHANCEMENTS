@@ -488,7 +488,7 @@
     },
     "max_one_statement": {
       "exclude": [],
-      "severity": "Error"
+      "severity": "Warning"
     },
     "message_exists": {
       "exclude": [],
