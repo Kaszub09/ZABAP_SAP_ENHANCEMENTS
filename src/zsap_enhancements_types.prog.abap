@@ -41,4 +41,4 @@
       is_sap_internal              TYPE abap_bool,
       color                        TYPE lvc_t_scol,
     END OF t_output,
-    tt_output TYPE STANDARD TABLE OF t_output.
+    tt_output TYPE STANDARD TABLE OF t_output WITH EMPTY KEY.
