@@ -17,6 +17,6 @@ Report is based on https://community.sap.com/t5/enterprise-resource-planning-blo
 Through abapGit https://github.com/abapGit/abapGit. Install this project after installing https://github.com/Kaszub09/ZABAP_SALV_REPORT.
 
 ## Requirements
-Requires class from another project: [https://github.com/Kaszub09/ZABAP_SALV_REPORT](https://github.com/Kaszub09/abapEasyALV).
+Requires class from another project: https://github.com/Kaszub09/abapEasyALV.
 
 Written in ABAP 750.
