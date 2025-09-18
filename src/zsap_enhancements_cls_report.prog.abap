@@ -2,7 +2,7 @@
 *&  Include  zsap_enhancements_cls_report
 *&---------------------------------------------------------------------*
 
-CLASS lcl_report DEFINITION INHERITING FROM zcl_zabap_salv_report.
+CLASS lcl_report DEFINITION INHERITING FROM zcl_ea_salv_table.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF c_ext_type,
@@ -64,7 +64,7 @@ CLASS lcl_report IMPLEMENTATION.
     ENDLOOP.
 
     SORT output BY transaction program enhancement_type enhancement_name implementation.
-    set_data( EXPORTING create_table_copy = abap_false CHANGING data_table = output ).
+    set_data( REF #( output ) ).
 
     prepare_columns( ).
   ENDMETHOD.
@@ -135,7 +135,7 @@ CLASS lcl_report IMPLEMENTATION.
     devclasses_range = VALUE #( FOR devclass IN devclasses ( sign = 'I' option = 'EQ' low = devclass-devclass ) ).
 
     DATA implementations_to_exclude TYPE RANGE OF enhname.
-    implementations_to_exclude = VALUE #( FOR line IN enhancements where ( enhancement_type = c_ext_type-enhancement_spot )
+    implementations_to_exclude = VALUE #( FOR line IN enhancements WHERE ( enhancement_type = c_ext_type-enhancement_spot )
         ( sign = 'E' option = 'EQ' low = line-enhancement_spot_impl )  ).
 
     SELECT FROM enhobj
@@ -184,13 +184,13 @@ CLASS lcl_report IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD prepare_columns.
-    set_fixed_column_text( column = 'DESCRIPTION' text = TEXT-c01 ).
-    set_fixed_column_text( column = 'IMPLEMENTATION' text = TEXT-c02 ).
-    set_fixed_column_text( column = 'ENHANCEMENT_TYPE_DESCRIPTION' text = TEXT-c03 ).
-    set_fixed_column_text( column = 'IS_ACTIVE' text = TEXT-c04 ).
-    set_fixed_column_text( column = 'IS_SAP_INTERNAL' text = TEXT-c05 ).
+    columns->set_fixed_text( column = 'DESCRIPTION' text = TEXT-c01 ).
+    columns->set_fixed_text( column = 'IMPLEMENTATION' text = TEXT-c02 ).
+    columns->set_fixed_text( column = 'ENHANCEMENT_TYPE_DESCRIPTION' text = TEXT-c03 ).
+    columns->set_fixed_text( column = 'IS_ACTIVE' text = TEXT-c04 ).
+    columns->set_fixed_text( column = 'IS_SAP_INTERNAL' text = TEXT-c05 ).
 
-    hide_column( 'ENHANCEMENT_TYPE' ).
+    columns->set_as_hidden( 'ENHANCEMENT_TYPE' ).
 
     alv_table->get_columns( )->set_color_column( 'COLOR' ).
   ENDMETHOD.
